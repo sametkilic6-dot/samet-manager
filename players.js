@@ -1,680 +1,768 @@
-/* ============================================================
-   ⚽ SAMET MANAGER
-   PROFESSIONAL PLAYER DATABASE ENGINE
-   ============================================================
-
-   Amaç:
-   - 17.000+ oyuncu desteklemek
-   - FC/Career Mode tarzı oyuncu verisi
-   - Gerçek kulüp bağlantıları
-   - Transfer sistemi
-   - Oyuncu profili
-   - Potansiyel
-   - Maaş
-   - Piyasa değeri
-   - Oyuncu DNA
-   - Kişilik
-   - Sözleşme
-   - Fotoğraf sistemi
-   - Gelecekte veri paketleri ekleyebilme
-
-   index.html ile uyumludur.
-
-   Gerekli fonksiyonlar:
-   getPlayer(id)
-   getPlayersByClub(club)
-   ============================================================ */
-
-
-/* ============================================================
-   DATABASE VERSION
-   ============================================================ */
-
-const PLAYER_DATABASE_VERSION = "1.0.0";
-
-const PLAYER_DATABASE_SIZE = 17000;
-
-
-/* ============================================================
-   OYUNCU VERİ TABANI
-   ============================================================
-
-   Şimdilik örnek veri yapısı kullanılıyor.
-
-   Gerçek 17.000+ oyuncu veri paketi daha sonra bu yapıya
-   aktarılabilir.
-   ============================================================ */
-
-const players = [
-
-{
-    id: 1,
-
-    name: "Oyuncu Örneği",
-
-    firstName: "Oyuncu",
-    lastName: "Örneği",
-
-    nationality: "Türkiye",
-    country: "Türkiye",
-
-    club: "Galatasaray",
-
-    league: "Süper Lig",
-
-    position: "CM",
-
-    age: 22,
-
-    birthDate: "2004-01-01",
-
-    rating: 75,
-
-    potential: 82,
-
-    value: 5000000,
-
-    wage: 75000,
-
-    contractEnd: "2028-06-30",
-
-    transferListed: false,
-
-    loanListed: false,
-
-    freeAgent: false,
-
-    /* -------------------------
-       OYUNCU DNA
-       ------------------------- */
-
-    technical: 78,
-
-    physical: 74,
-
-    mental: 76,
-
-    pace: 72,
-
-    shooting: 70,
-
-    passing: 82,
-
-    dribbling: 75,
-
-    defending: 58,
-
-    physicality: 74,
-
-    stamina: 80,
-
-    strength: 68,
-
-    agility: 79,
-
-    balance: 81,
-
-    reactions: 77,
-
-    composure: 75,
-
-    vision: 84,
-
-    positioning: 72,
-
-    interceptions: 55,
-
-    tackling: 52,
-
-    crossing: 73,
-
-    finishing: 65,
-
-    longShots: 68,
-
-    freeKick: 60,
-
-    penalties: 55,
-
-    heading: 50,
-
-    jumping: 58,
-
-    acceleration: 74,
-
-    sprintSpeed: 71,
-
-    /* -------------------------
-       KİŞİLİK
-       ------------------------- */
-
-    personality: "Profesyonel",
-
-    ambition: 82,
-
-    professionalism: 85,
-
-    loyalty: 70,
-
-    leadership: 65,
-
-    temperament: 74,
-
-    workRate: "Yüksek",
-
-    weakFoot: 4,
-
-    skillMoves: 4,
-
-    preferredFoot: "Sağ",
-
-    /* -------------------------
-       KARİYER
-       ------------------------- */
-
-    careerGoal: "Avrupa'nın üst düzey kulüplerinde oynamak",
-
-    role: "İlk 11",
-
-    squadStatus: "Ana Kadro",
-
-    /* -------------------------
-       TRANSFER
-       ------------------------- */
-
-    transferInterest: 70,
-
-    wageDemand: 90000,
-
-    askingPrice: 5500000,
-
-    releaseClause: 15000000,
-
-    /* -------------------------
-       FOTOĞRAF
-       ------------------------- */
-
-    photo: "images/players/1.webp"
+/*
+========================================================
+SAMET MANAGER - PLAYER ENGINE
+========================================================
+
+Görevleri:
+- players-data.json yükleme
+- Oyuncu arama
+- Oyuncu ID sistemi
+- Kulübe göre kadro
+- Oyuncu profili
+- Transfer merkezi
+- 17.000+ oyuncuya uygun yapı
+- Fotoğraf URL altyapısı
+- Eski oyuncu veri formatlarıyla uyumluluk
+
+INDEX.HTML DEĞİŞTİRİLMEZ.
+========================================================
+*/
+
+let players = [];
+let playersLoaded = false;
+let playersLoading = false;
+
+const PLAYER_DATA_URL = "./players-data.json";
+
+/* ======================================================
+   VERİ YÜKLEME
+====================================================== */
+
+async function loadPlayers(){
+
+    if(playersLoaded){
+        return players;
+    }
+
+    if(playersLoading){
+        return players;
+    }
+
+    playersLoading = true;
+
+    try{
+
+        const response = await fetch(
+            PLAYER_DATA_URL + "?v=" + Date.now()
+        );
+
+        if(!response.ok){
+            throw new Error(
+                "players-data.json yüklenemedi."
+            );
+        }
+
+        const data = await response.json();
+
+        if(Array.isArray(data)){
+            players = data;
+        }
+        else if(
+            data &&
+            Array.isArray(data.players)
+        ){
+            players = data.players;
+        }
+        else{
+            players = [];
+        }
+
+        players = players.map(
+            normalizePlayer
+        );
+
+        playersLoaded = true;
+
+        console.log(
+            "Samet Manager:",
+            players.length,
+            "oyuncu yüklendi."
+        );
+
+        return players;
+
+    }
+    catch(error){
+
+        console.error(
+            "Oyuncu verileri yüklenemedi:",
+            error
+        );
+
+        players = [];
+
+        return [];
+
+    }
+    finally{
+
+        playersLoading = false;
+
+    }
 
 }
 
-];
 
+/* ======================================================
+   OYUNCU NORMALİZASYONU
+====================================================== */
 
-/* ============================================================
-   OYUNCU INDEXLERİ
-   ============================================================
+function normalizePlayer(player,index){
 
-   17.000+ oyuncuda sürekli .find() kullanmak yerine Map
-   kullanıyoruz.
-
-   Böylece:
-
-   getPlayer(15000)
-
-   gibi sorgular çok daha hızlı çalışır.
-   ============================================================ */
-
-const playerById = new Map();
-
-const playersByClub = new Map();
-
-const playersByCountry = new Map();
-
-const playersByPosition = new Map();
-
-
-/* ============================================================
-   INDEX OLUŞTUR
-   ============================================================ */
-
-function buildPlayerIndexes(){
-
-    playerById.clear();
-
-    playersByClub.clear();
-
-    playersByCountry.clear();
-
-    playersByPosition.clear();
-
-
-    players.forEach(player => {
-
-        /* -------------------------
-           ID INDEX
-           ------------------------- */
-
-        playerById.set(
-            Number(player.id),
-            player
+    const rating =
+        Number(
+            player.rating ??
+            player.OVR ??
+            player.overall ??
+            0
         );
 
+    const potential =
+        Number(
+            player.potential ??
+            player.POT ??
+            rating
+        );
 
-        /* -------------------------
-           KULÜP INDEX
-           ------------------------- */
+    const age =
+        Number(
+            player.age ??
+            player.Age ??
+            0
+        );
 
-        const club =
-            player.club ||
-            "Serbest Oyuncu";
+    const value =
+        Number(
+            player.value ??
+            player.marketValue ??
+            0
+        );
+
+    const wage =
+        Number(
+            player.wage ??
+            player.salary ??
+            0
+        );
+
+    const country =
+        player.country ??
+        player.nationality ??
+        player.Nation ??
+        "Belirsiz";
+
+    const club =
+        player.club ??
+        player.team ??
+        player.Team ??
+        "";
+
+    const position =
+        normalizePosition(
+            player.position ??
+            player.Position ??
+            ""
+        );
+
+    const id =
+        player.id ??
+        player.ID ??
+        player.playerId ??
+        index + 1;
+
+    return {
+
+        id: id,
+
+        name:
+            player.name ??
+            player.Name ??
+            "Bilinmeyen Oyuncu",
+
+        nationality:
+            country,
+
+        country:
+            country,
+
+        club:
+            club,
+
+        league:
+            player.league ??
+            player.League ??
+            "",
+
+        position:
+            position,
+
+        age:
+            age,
+
+        rating:
+            rating,
+
+        potential:
+            potential,
+
+        value:
+            value,
+
+        wage:
+            wage,
+
+        contractEnd:
+            player.contractEnd ??
+            player.contract_end ??
+            "Bilinmiyor",
+
+        technical:
+            Number(
+                player.technical ??
+                calculateTechnical(player)
+            ),
+
+        physical:
+            Number(
+                player.physical ??
+                calculatePhysical(player)
+            ),
+
+        mental:
+            Number(
+                player.mental ??
+                calculateMental(player)
+            ),
+
+        pace:
+            Number(
+                player.pace ??
+                player.PAC ??
+                0
+            ),
+
+        shooting:
+            Number(
+                player.shooting ??
+                player.SHO ??
+                0
+            ),
+
+        passing:
+            Number(
+                player.passing ??
+                player.PAS ??
+                0
+            ),
+
+        dribbling:
+            Number(
+                player.dribbling ??
+                player.DRI ??
+                0
+            ),
+
+        defending:
+            Number(
+                player.defending ??
+                player.DEF ??
+                0
+            ),
+
+        physicality:
+            Number(
+                player.physicality ??
+                player.PHY ??
+                0
+            ),
+
+        preferredFoot:
+            player.preferredFoot ??
+            player["Preferred foot"] ??
+            "Bilinmiyor",
+
+        weakFoot:
+            Number(
+                player.weakFoot ??
+                player["Weak foot"] ??
+                0
+            ),
+
+        skillMoves:
+            Number(
+                player.skillMoves ??
+                player["Skill moves"] ??
+                0
+            ),
+
+        personality:
+            player.personality ??
+            generatePersonality(player),
+
+        ambition:
+            Number(
+                player.ambition ??
+                generateAmbition(player)
+            ),
+
+        professionalism:
+            Number(
+                player.professionalism ??
+                generateProfessionalism(player)
+            ),
+
+        careerGoal:
+            player.careerGoal ??
+            generateCareerGoal(player),
+
+        transferListed:
+            Boolean(
+                player.transferListed ??
+                player.transfer_listed ??
+                false
+            ),
+
+        loanListed:
+            Boolean(
+                player.loanListed ??
+                player.loan_listed ??
+                false
+            ),
+
+        freeAgent:
+            Boolean(
+                player.freeAgent ??
+                player.free_agent ??
+                !club
+            ),
+
+        photo:
+            player.photo ??
+            player.image ??
+            player.url ??
+            null
+
+    };
+
+}
 
 
-        if(!playersByClub.has(club)){
+/* ======================================================
+   MEVKİ NORMALİZASYONU
+====================================================== */
 
-            playersByClub.set(
-                club,
-                []
-            );
+function normalizePosition(position){
 
-        }
+    if(!position){
+        return "";
+    }
 
+    const p =
+        String(position)
+        .toUpperCase()
+        .trim();
 
-        playersByClub
-            .get(club)
-            .push(player);
+    const map = {
 
+        "GK":"GK",
+        "GOALKEEPER":"GK",
 
-        /* -------------------------
-           ÜLKE INDEX
-           ------------------------- */
+        "CB":"CB",
+        "DEFENDER":"CB",
 
-        const country =
-            player.country ||
-            player.nationality ||
-            "Belirsiz";
+        "LB":"LB",
+        "LWB":"LB",
 
+        "RB":"RB",
+        "RWB":"RB",
 
-        if(!playersByCountry.has(country)){
+        "CDM":"CDM",
+        "DM":"CDM",
 
-            playersByCountry.set(
-                country,
-                []
-            );
+        "CM":"CM",
 
-        }
+        "CAM":"CAM",
+        "AM":"CAM",
 
+        "LM":"LM",
 
-        playersByCountry
-            .get(country)
-            .push(player);
+        "RM":"RM",
 
+        "LW":"LW",
 
-        /* -------------------------
-           MEVKİ INDEX
-           ------------------------- */
+        "RW":"RW",
 
-        const position =
-            player.position ||
-            "UNKNOWN";
+        "ST":"ST",
+        "CF":"ST",
+        "FORWARD":"ST"
 
+    };
 
-        if(!playersByPosition.has(position)){
+    return map[p] || p;
 
-            playersByPosition.set(
-                position,
-                []
-            );
-
-        }
+}
 
 
-        playersByPosition
-            .get(position)
-            .push(player);
+/* ======================================================
+   TEKNİK / FİZİK / ZİHİNSEL
+====================================================== */
+
+function calculateTechnical(player){
+
+    const values = [
+
+        Number(player.PAS) || 0,
+        Number(player.DRI) || 0,
+        Number(player.shooting) || 0,
+        Number(player.SHO) || 0
+
+    ];
+
+    const valid =
+        values.filter(v => v > 0);
+
+    if(!valid.length){
+        return Number(
+            player.OVR ??
+            player.rating ??
+            0
+        );
+    }
+
+    return Math.round(
+        valid.reduce(
+            (a,b) => a+b,
+            0
+        ) / valid.length
+    );
+
+}
+
+
+function calculatePhysical(player){
+
+    const values = [
+
+        Number(player.PHY) || 0,
+        Number(player.physicality) || 0,
+        Number(player["Sprint Speed"]) || 0,
+        Number(player.Strength) || 0
+
+    ];
+
+    const valid =
+        values.filter(v => v > 0);
+
+    if(!valid.length){
+        return Number(
+            player.OVR ??
+            player.rating ??
+            0
+        );
+    }
+
+    return Math.round(
+        valid.reduce(
+            (a,b) => a+b,
+            0
+        ) / valid.length
+    );
+
+}
+
+
+function calculateMental(player){
+
+    const values = [
+
+        Number(player.Reactions) || 0,
+        Number(player.Composure) || 0,
+        Number(player.Vision) || 0,
+        Number(player.Positioning) || 0
+
+    ];
+
+    const valid =
+        values.filter(v => v > 0);
+
+    if(!valid.length){
+        return Number(
+            player.OVR ??
+            player.rating ??
+            0
+        );
+    }
+
+    return Math.round(
+        valid.reduce(
+            (a,b) => a+b,
+            0
+        ) / valid.length
+    );
+
+}
+
+
+/* ======================================================
+   KİŞİLİK
+====================================================== */
+
+function generatePersonality(player){
+
+    const rating =
+        Number(player.rating ?? player.OVR) || 0;
+
+    const potential =
+        Number(player.potential ?? player.POT) || rating;
+
+    if(potential - rating >= 15){
+        return "Gelişime Açık";
+    }
+
+    if(rating >= 88){
+        return "Yıldız";
+    }
+
+    if(rating >= 80){
+        return "Profesyonel";
+    }
+
+    return "Dengeli";
+
+}
+
+
+function generateAmbition(player){
+
+    const rating =
+        Number(player.rating ?? player.OVR) || 0;
+
+    const potential =
+        Number(player.potential ?? player.POT) || rating;
+
+    return Math.max(
+        50,
+        Math.min(
+            99,
+            Math.round(
+                55 +
+                (potential - rating) * 2 +
+                rating * 0.2
+            )
+        )
+    );
+
+}
+
+
+function generateProfessionalism(player){
+
+    const rating =
+        Number(player.rating ?? player.OVR) || 0;
+
+    return Math.max(
+        50,
+        Math.min(
+            99,
+            Math.round(
+                55 + rating * 0.35
+            )
+        )
+    );
+
+}
+
+
+function generateCareerGoal(player){
+
+    const rating =
+        Number(player.rating ?? player.OVR) || 0;
+
+    if(rating >= 88){
+        return "Şampiyonlar Ligi ve büyük kupalar";
+    }
+
+    if(rating >= 80){
+        return "Avrupa kupalarında mücadele etmek";
+    }
+
+    return "Kariyerinde gelişmek";
+}
+
+
+/* ======================================================
+   OYUNCU BUL
+====================================================== */
+
+function getPlayer(id){
+
+    return players.find(
+        player =>
+            String(player.id) === String(id)
+    );
+
+}
+
+
+/* ======================================================
+   KULÜBE GÖRE OYUNCULAR
+====================================================== */
+
+function getPlayersByClub(clubName){
+
+    if(!clubName){
+        return [];
+    }
+
+    const target =
+        normalizeText(clubName);
+
+    return players.filter(player => {
+
+        return normalizeText(
+            player.club
+        ) === target;
 
     });
 
 }
 
 
-/* ============================================================
-   OYUNCU GETİR
-   ============================================================ */
+/* ======================================================
+   METİN NORMALİZASYONU
+====================================================== */
 
-function getPlayer(id){
+function normalizeText(value){
 
-    return playerById.get(
-        Number(id)
-    ) || null;
-
-}
-
-
-/* ============================================================
-   KULÜBE GÖRE OYUNCULAR
-   ============================================================ */
-
-function getPlayersByClub(club){
-
-    if(!club){
-
-        return [];
-
-    }
-
-    return (
-        playersByClub.get(club)
-        || []
-    );
+    return String(
+        value ?? ""
+    )
+    .toLocaleLowerCase("tr-TR")
+    .trim();
 
 }
 
 
-/* ============================================================
-   ÜLKEYE GÖRE OYUNCULAR
-   ============================================================ */
-
-function getPlayersByCountry(country){
-
-    if(!country){
-
-        return [];
-
-    }
-
-    return (
-        playersByCountry.get(country)
-        || []
-    );
-
-}
-
-
-/* ============================================================
-   MEVKİYE GÖRE OYUNCULAR
-   ============================================================ */
-
-function getPlayersByPosition(position){
-
-    if(!position){
-
-        return [];
-
-    }
-
-    return (
-        playersByPosition.get(position)
-        || []
-    );
-
-}
-
-
-/* ============================================================
+/* ======================================================
    OYUNCU ARAMA
-   ============================================================ */
+====================================================== */
 
 function searchPlayers(query){
 
-    if(!query){
+    const q =
+        normalizeText(query);
 
+    if(!q){
         return players;
-
     }
 
-
-    const search =
-        String(query)
-            .toLowerCase()
-            .trim();
-
-
     return players.filter(
-        player => {
-
-            return (
-                String(player.name || "")
-                    .toLowerCase()
-                    .includes(search)
-
-                ||
-
-                String(player.club || "")
-                    .toLowerCase()
-                    .includes(search)
-
-                ||
-
-                String(
-                    player.nationality || ""
-                )
-                    .toLowerCase()
-                    .includes(search)
-            );
-
-        }
+        player =>
+            normalizeText(
+                player.name
+            ).includes(q)
     );
 
 }
 
 
-/* ============================================================
-   GELİŞMİŞ OYUNCU FİLTRESİ
-   ============================================================ */
+/* ======================================================
+   OYUNCU İSTATİSTİKLERİ
+====================================================== */
 
-function filterPlayers(options = {}){
+function getPlayerStats(player){
 
-    let result = players;
+    return {
 
+        rating: player.rating,
 
-    if(options.club){
+        potential: player.potential,
 
-        result =
-            result.filter(
-                player =>
-                    player.club === options.club
-            );
+        pace: player.pace,
 
-    }
+        shooting: player.shooting,
 
+        passing: player.passing,
 
-    if(options.country){
+        dribbling: player.dribbling,
 
-        result =
-            result.filter(
-                player =>
-                    (
-                        player.country ||
-                        player.nationality
-                    )
-                    === options.country
-            );
+        defending: player.defending,
 
-    }
+        physicality: player.physicality
 
-
-    if(options.position){
-
-        result =
-            result.filter(
-                player =>
-                    player.position ===
-                    options.position
-            );
-
-    }
-
-
-    if(options.minAge !== undefined){
-
-        result =
-            result.filter(
-                player =>
-                    Number(player.age)
-                    >= Number(options.minAge)
-            );
-
-    }
-
-
-    if(options.maxAge !== undefined){
-
-        result =
-            result.filter(
-                player =>
-                    Number(player.age)
-                    <= Number(options.maxAge)
-            );
-
-    }
-
-
-    if(options.minRating !== undefined){
-
-        result =
-            result.filter(
-                player =>
-                    Number(player.rating)
-                    >= Number(options.minRating)
-            );
-
-    }
-
-
-    if(options.maxRating !== undefined){
-
-        result =
-            result.filter(
-                player =>
-                    Number(player.rating)
-                    <= Number(options.maxRating)
-            );
-
-    }
-
-
-    if(options.minPotential !== undefined){
-
-        result =
-            result.filter(
-                player =>
-                    Number(player.potential)
-                    >= Number(options.minPotential)
-            );
-
-    }
-
-
-    if(options.maxValue !== undefined){
-
-        result =
-            result.filter(
-                player =>
-                    Number(player.value)
-                    <= Number(options.maxValue)
-            );
-
-    }
-
-
-    if(options.transferListed){
-
-        result =
-            result.filter(
-                player =>
-                    player.transferListed === true
-            );
-
-    }
-
-
-    if(options.loanListed){
-
-        result =
-            result.filter(
-                player =>
-                    player.loanListed === true
-            );
-
-    }
-
-
-    if(options.freeAgent){
-
-        result =
-            result.filter(
-                player =>
-                    player.freeAgent === true
-            );
-
-    }
-
-
-    return result;
+    };
 
 }
 
 
-/* ============================================================
-   TRANSFER UYGUNLUK SKORU
-   ============================================================ */
+/* ======================================================
+   TRANSFER İHTİMALİ
+====================================================== */
 
-function getTransferInterest(player, club){
+function playerTransferChance(
+    player,
+    club
+){
 
     if(!player || !club){
-
         return 50;
-
     }
-
 
     let score = 50;
 
-
-    const clubRep =
+    const reputation =
         Number(
-            club.reputation || 50
-        );
-
+            club.reputation
+        ) || 0;
 
     const rating =
         Number(
-            player.rating || 0
-        );
-
+            player.rating
+        ) || 0;
 
     const potential =
         Number(
-            player.potential || rating
-        );
-
+            player.potential
+        ) || rating;
 
     const age =
         Number(
-            player.age || 25
-        );
+            player.age
+        ) || 25;
 
 
-    /* KULÜP SEVİYESİ */
+    if(
+        reputation >= rating + 15
+    ){
 
-    if(clubRep >= rating + 15){
-
-        score += 20;
-
-    }
-    else if(clubRep >= rating){
-
-        score += 12;
+        score += 25;
 
     }
-    else if(clubRep >= rating - 10){
+    else if(
+        reputation >= rating
+    ){
 
-        score += 3;
+        score += 15;
+
+    }
+    else if(
+        reputation >= rating - 10
+    ){
+
+        score += 5;
 
     }
     else{
 
-        score -= 18;
+        score -= 20;
 
     }
 
 
-    /* GENÇ OYUNCU */
-
     if(
-        age <= 23 &&
-        potential >= 80
+        age <= 21 &&
+        potential >= rating + 10 &&
+        reputation >= 75
     ){
 
         score += 8;
@@ -682,41 +770,39 @@ function getTransferInterest(player, club){
     }
 
 
-    /* TRANSFER LİSTESİ */
-
-    if(player.transferListed){
+    if(
+        player.transferListed
+    ){
 
         score += 10;
 
     }
 
 
-    /* KİRALIK */
+    if(
+        player.loanListed
+    ){
 
-    if(player.loanListed){
-
-        score += 6;
+        score += 5;
 
     }
 
 
-    /* SERBEST */
-
-    if(player.freeAgent){
+    if(
+        player.freeAgent
+    ){
 
         score += 15;
 
     }
 
 
-    /* YILDIZ */
-
     if(
-        rating >= 88 &&
-        clubRep < 90
+        rating >= 90 &&
+        reputation < 90
     ){
 
-        score -= 20;
+        score -= 15;
 
     }
 
@@ -732,179 +818,95 @@ function getTransferInterest(player, club){
 }
 
 
-/* ============================================================
-   FOTOĞRAF SİSTEMİ
-   ============================================================ */
+/* ======================================================
+   FOTOĞRAF
+====================================================== */
 
 function getPlayerPhoto(player){
 
-    if(!player){
-
-        return "images/players/default.webp";
-
-    }
-
-
-    if(player.photo){
+    if(
+        player &&
+        player.photo
+    ){
 
         return player.photo;
 
     }
 
-
-    return (
-        "images/players/" +
-        player.id +
-        ".webp"
-    );
-
-}
-
-
-/* ============================================================
-   OYUNCU YAŞ HESAPLAMA
-   ============================================================ */
-
-function calculateAge(birthDate){
-
-    if(!birthDate){
-
-        return null;
-
-    }
-
-
-    const birth =
-        new Date(birthDate);
-
-    const now =
-        new Date();
-
-
-    let age =
-        now.getFullYear() -
-        birth.getFullYear();
-
-
-    const month =
-        now.getMonth() -
-        birth.getMonth();
-
-
     if(
-        month < 0 ||
-        (
-            month === 0 &&
-            now.getDate() <
-            birth.getDate()
-        )
+        player &&
+        player.id
     ){
 
-        age--;
+        return (
+            "images/players/" +
+            player.id +
+            ".webp"
+        );
 
     }
 
-
-    return age;
+    return "";
 
 }
 
 
-/* ============================================================
-   OYUNCU VERİSİ DOĞRULAMA
-   ============================================================ */
+/* ======================================================
+   VERİTABANI DURUMU
+====================================================== */
 
-function validatePlayer(player){
-
-    if(!player){
-
-        return false;
-
-    }
-
-
-    if(
-        player.id === undefined ||
-        !player.name
-    ){
-
-        return false;
-
-    }
-
-
-    return true;
-
-}
-
-
-/* ============================================================
-   VERİ TABANI İSTATİSTİKLERİ
-   ============================================================ */
-
-function getPlayerDatabaseStats(){
+function getPlayerDatabaseStatus(){
 
     return {
 
-        version:
-            PLAYER_DATABASE_VERSION,
+        loaded:
+            playersLoaded,
 
-        expectedPlayers:
-            PLAYER_DATABASE_SIZE,
+        loading:
+            playersLoading,
 
-        loadedPlayers:
-            players.length,
-
-        clubs:
-            playersByClub.size,
-
-        countries:
-            playersByCountry.size,
-
-        positions:
-            playersByPosition.size
+        count:
+            players.length
 
     };
 
 }
 
 
-/* ============================================================
-   VERİ TABANI BAŞLAT
-   ============================================================ */
+/* ======================================================
+   BAŞLAT
+====================================================== */
 
-buildPlayerIndexes();
+loadPlayers();
 
 
-/* ============================================================
-   DEBUG
-   ============================================================ */
+/*
+========================================================
+GLOBAL API
+========================================================
 
-console.log(
-    "⚽ Samet Manager Player Database"
-);
+Index.html bu fonksiyonları kullanır.
+========================================================
+*/
 
-console.log(
-    "📦 Database Version:",
-    PLAYER_DATABASE_VERSION
-);
+window.players = players;
 
-console.log(
-    "👥 Loaded Players:",
-    players.length
-);
+window.getPlayer = getPlayer;
 
-console.log(
-    "🏟️ Clubs:",
-    playersByClub.size
-);
+window.getPlayersByClub =
+    getPlayersByClub;
 
-console.log(
-    "🌍 Countries:",
-    playersByCountry.size
-);
+window.searchPlayers =
+    searchPlayers;
 
-console.log(
-    "📊 Positions:",
-    playersByPosition.size
-);
+window.getPlayerStats =
+    getPlayerStats;
+
+window.playerTransferChance =
+    playerTransferChance;
+
+window.getPlayerPhoto =
+    getPlayerPhoto;
+
+window.getPlayerDatabaseStatus =
+    getPlayerDatabaseStatus;
