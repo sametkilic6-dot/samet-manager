@@ -1,0 +1,1206 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Samet Manager</title>
+
+<style>
+
+*{
+box-sizing:border-box;
+}
+
+body{
+margin:0;
+background:#07111f;
+color:#fff;
+font-family:Arial,sans-serif;
+}
+
+button,
+input{
+font:inherit;
+}
+
+.app{
+max-width:700px;
+margin:auto;
+padding:16px;
+}
+
+.logo{
+text-align:center;
+padding:24px 0;
+}
+
+.logo h1{
+margin:0;
+font-size:32px;
+}
+
+.logo p{
+color:#94a3b8;
+}
+
+.card{
+background:#101c2e;
+border:1px solid #263852;
+border-radius:18px;
+padding:18px;
+margin-bottom:14px;
+}
+
+button{
+width:100%;
+border:0;
+border-radius:14px;
+padding:16px;
+margin-top:10px;
+background:#1d2b42;
+color:white;
+font-weight:bold;
+cursor:pointer;
+}
+
+button.primary{
+background:#2563eb;
+}
+
+button.back{
+background:#334155;
+}
+
+.hidden{
+display:none;
+}
+
+input{
+width:100%;
+padding:14px;
+border-radius:12px;
+border:1px solid #334155;
+background:#091526;
+color:white;
+outline:none;
+}
+
+.club,
+.player{
+padding:15px;
+margin-top:10px;
+border:1px solid #2b3d59;
+border-radius:14px;
+background:#0c1829;
+cursor:pointer;
+}
+
+.club-name,
+.player-name{
+font-size:18px;
+font-weight:bold;
+}
+
+.club-info,
+.player-info{
+color:#94a3b8;
+margin-top:6px;
+font-size:14px;
+}
+
+.stats{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:10px;
+margin-top:15px;
+}
+
+.stat{
+background:#091526;
+border-radius:12px;
+padding:13px;
+}
+
+.label{
+color:#94a3b8;
+font-size:12px;
+}
+
+.value{
+margin-top:5px;
+font-weight:bold;
+font-size:16px;
+}
+
+.rating{
+font-size:28px;
+font-weight:bold;
+}
+
+.potential{
+color:#60a5fa;
+}
+
+.progress{
+height:8px;
+background:#1e293b;
+border-radius:10px;
+margin-top:8px;
+overflow:hidden;
+}
+
+.progress-bar{
+height:100%;
+background:#2563eb;
+}
+
+.menu-grid{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:10px;
+}
+
+.menu-grid button{
+margin-top:0;
+}
+
+.news{
+border-left:3px solid #2563eb;
+padding-left:12px;
+color:#cbd5e1;
+}
+
+.small{
+font-size:13px;
+color:#94a3b8;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+
+<!-- ========================= -->
+<!-- ANA MENÜ -->
+<!-- ========================= -->
+
+<section id="home">
+
+<div class="logo">
+
+<h1>⚽ Samet Manager</h1>
+
+<p>Tek kişilik futbol menajerlik oyunu</p>
+
+</div>
+
+<div class="card">
+
+<h2>🎮 Kariyer</h2>
+
+<button
+class="primary"
+onclick="showPage('clubs')"
+>
+➕ Yeni Kariyer
+</button>
+
+<button
+onclick="loadCareer()"
+>
+💾 Kayıtlı Kariyer
+</button>
+
+</div>
+
+<div class="card">
+
+<h2>ℹ️ V0.3</h2>
+
+<p class="small">
+Kariyer, kulüp, kadro ve oyuncu sistemi aktif.
+</p>
+
+</div>
+
+</section>
+
+
+<!-- ========================= -->
+<!-- KULÜP SEÇİMİ -->
+<!-- ========================= -->
+
+<section id="clubs" class="hidden">
+
+<button
+class="back"
+onclick="showPage('home')"
+>
+← Geri
+</button>
+
+<div class="card">
+
+<h2>🏟️ Kulübünü Seç</h2>
+
+<input
+id="clubSearch"
+placeholder="Kulüp ara..."
+oninput="renderClubs()"
+>
+
+<div id="clubList"></div>
+
+</div>
+
+</section>
+
+
+<!-- ========================= -->
+<!-- KULÜP DETAY -->
+<!-- ========================= -->
+
+<section id="clubDetail" class="hidden">
+
+<button
+class="back"
+onclick="showPage('clubs')"
+>
+← Kulüplere Dön
+</button>
+
+<div class="card">
+
+<h2 id="detailClubName"></h2>
+
+<p id="detailLeague"></p>
+
+<div class="stats">
+
+<div class="stat">
+
+<div class="label">
+⭐ İTİBAR
+</div>
+
+<div
+class="value"
+id="detailRep"
+></div>
+
+</div>
+
+<div class="stat">
+
+<div class="label">
+💰 BÜTÇE
+</div>
+
+<div
+class="value"
+id="detailBudget"
+></div>
+
+</div>
+
+<div class="stat">
+
+<div class="label">
+🎯 HEDEF
+</div>
+
+<div
+class="value"
+id="detailGoal"
+></div>
+
+</div>
+
+<div class="stat">
+
+<div class="label">
+🏆 BAŞARI
+</div>
+
+<div
+class="value"
+id="detailHistory"
+></div>
+
+</div>
+
+</div>
+
+<button
+class="primary"
+onclick="startCareer()"
+>
+🚀 Kariyere Başla
+</button>
+
+</div>
+
+</section>
+
+
+<!-- ========================= -->
+<!-- KARİYER -->
+<!-- ========================= -->
+
+<section id="career" class="hidden">
+
+<div class="logo">
+
+<h1>⚽ Samet Manager</h1>
+
+<p id="careerDate"></p>
+
+</div>
+
+
+<div class="card">
+
+<h2 id="careerClubName"></h2>
+
+<p id="careerLeague"></p>
+
+<div class="stats">
+
+<div class="stat">
+
+<div class="label">
+💰 TRANSFER BÜTÇESİ
+</div>
+
+<div
+class="value"
+id="careerBudget"
+></div>
+
+</div>
+
+<div class="stat">
+
+<div class="label">
+⭐ KULÜP İTİBARI
+</div>
+
+<div
+class="value"
+id="careerRep"
+></div>
+
+</div>
+
+</div>
+
+</div>
+
+
+<!-- ASİSTAN -->
+
+<div class="card">
+
+<h2>🤖 Asistan</h2>
+
+<div class="news">
+
+<p>
+Hocam, yeni sezon için hazırlıklara başlayabilirsiniz.
+</p>
+
+<p class="small">
+Bugünün gündemi: Kadroyu incele, transfer hedeflerini belirle ve antrenman planını oluştur.
+</p>
+
+</div>
+
+</div>
+
+
+<!-- YÖNETİM -->
+
+<div class="card">
+
+<h2>📋 Yönetim Merkezi</h2>
+
+<div class="menu-grid">
+
+<button
+onclick="showSquad()"
+>
+👥 Kadro
+</button>
+
+<button
+onclick="comingSoon('Transfer Merkezi')"
+>
+🔄 Transfer
+</button>
+
+<button
+onclick="comingSoon('Antrenman Merkezi')"
+>
+🏋️ Antrenman
+</button>
+
+<button
+onclick="comingSoon('Scout Merkezi')"
+>
+🔎 Scout
+</button>
+
+<button
+onclick="comingSoon('Futbol Gündemi')"
+>
+📱 Gündem
+</button>
+
+<button
+onclick="comingSoon('Maç Merkezi')"
+>
+⚽ Maç
+</button>
+
+</div>
+
+</div>
+
+
+<!-- KADRO -->
+
+<div
+id="squadPanel"
+class="card hidden"
+>
+
+<button
+class="back"
+onclick="closePanel('squadPanel')"
+>
+← Kariyere Dön
+</button>
+
+<h2>👥 Kadro</h2>
+
+<div id="squadList"></div>
+
+</div>
+
+
+<!-- OYUNCU PROFİLİ -->
+
+<div
+id="playerPanel"
+class="card hidden"
+>
+
+<button
+class="back"
+onclick="closePanel('playerPanel')"
+>
+← Kadroya Dön
+</button>
+
+<div id="playerProfile"></div>
+
+</div>
+
+
+</section>
+
+</div>
+
+
+<!-- PLAYERS.JS -->
+
+<script src="players.js"></script>
+
+
+<script>
+
+/* =========================
+   KULÜPLER
+========================= */
+
+const clubs = [
+
+{
+id:1,
+name:"Galatasaray",
+country:"🇹🇷 Türkiye",
+league:"Süper Lig",
+reputation:88,
+budget:35000000,
+goal:"Şampiyonluk",
+history:"Lig şampiyonluğu"
+},
+
+{
+id:2,
+name:"Fenerbahçe",
+country:"🇹🇷 Türkiye",
+league:"Süper Lig",
+reputation:87,
+budget:32000000,
+goal:"Şampiyonluk",
+history:"Şampiyonluk yarışı"
+},
+
+{
+id:3,
+name:"Beşiktaş",
+country:"🇹🇷 Türkiye",
+league:"Süper Lig",
+reputation:82,
+budget:22000000,
+goal:"İlk 3",
+history:"Avrupa kupası"
+},
+
+{
+id:4,
+name:"Eyüpspor",
+country:"🇹🇷 Türkiye",
+league:"Süper Lig",
+reputation:62,
+budget:8000000,
+goal:"İlk 8",
+history:"Lig yükselişi"
+},
+
+{
+id:5,
+name:"Manchester City",
+country:"🇬🇧 İngiltere",
+league:"Premier League",
+reputation:96,
+budget:150000000,
+goal:"Şampiyonluk",
+history:"Premier League"
+},
+
+{
+id:6,
+name:"Real Madrid",
+country:"🇪🇸 İspanya",
+league:"La Liga",
+reputation:98,
+budget:180000000,
+goal:"Şampiyonlar Ligi",
+history:"Avrupa şampiyonluğu"
+}
+
+];
+
+
+let selectedClub = null;
+
+
+/* =========================
+   SAYFA SİSTEMİ
+========================= */
+
+function showPage(page){
+
+document
+.querySelectorAll("section")
+.forEach(section => {
+
+section.classList.add("hidden");
+
+});
+
+document
+.getElementById(page)
+.classList.remove("hidden");
+
+if(page === "clubs"){
+
+renderClubs();
+
+}
+
+}
+
+
+/* =========================
+   KULÜP LİSTESİ
+========================= */
+
+function renderClubs(){
+
+const search =
+document
+.getElementById("clubSearch")
+.value
+.toLowerCase();
+
+const list =
+document
+.getElementById("clubList");
+
+list.innerHTML = "";
+
+
+clubs
+.filter(club =>
+club.name
+.toLowerCase()
+.includes(search)
+)
+.forEach(club => {
+
+const div =
+document.createElement("div");
+
+div.className = "club";
+
+div.innerHTML = `
+
+<div class="club-name">
+${club.name}
+</div>
+
+<div class="club-info">
+${club.country}
+•
+${club.league}
+</div>
+
+`;
+
+div.onclick =
+() => selectClub(club.id);
+
+list.appendChild(div);
+
+});
+
+}
+
+
+/* =========================
+   KULÜP SEÇ
+========================= */
+
+function selectClub(id){
+
+selectedClub =
+clubs.find(
+club => club.id === id
+);
+
+document
+.getElementById("detailClubName")
+.textContent =
+selectedClub.name;
+
+document
+.getElementById("detailLeague")
+.textContent =
+selectedClub.country +
+" • " +
+selectedClub.league;
+
+document
+.getElementById("detailRep")
+.textContent =
+selectedClub.reputation;
+
+document
+.getElementById("detailBudget")
+.textContent =
+formatMoney(selectedClub.budget);
+
+document
+.getElementById("detailGoal")
+.textContent =
+selectedClub.goal;
+
+document
+.getElementById("detailHistory")
+.textContent =
+selectedClub.history;
+
+showPage("clubDetail");
+
+}
+
+
+/* =========================
+   KARİYER BAŞLAT
+========================= */
+
+function startCareer(){
+
+if(!selectedClub){
+
+return;
+
+}
+
+const career = {
+
+clubId:selectedClub.id,
+
+club:selectedClub.name,
+
+league:selectedClub.league,
+
+reputation:selectedClub.reputation,
+
+budget:selectedClub.budget,
+
+date:"2026-08-19"
+
+};
+
+
+localStorage.setItem(
+"sametCareer",
+JSON.stringify(career)
+);
+
+loadCareer();
+
+}
+
+
+/* =========================
+   KARİYER YÜKLE
+========================= */
+
+function loadCareer(){
+
+const data =
+localStorage.getItem(
+"sametCareer"
+);
+
+if(!data){
+
+alert(
+"Henüz kayıtlı bir kariyer yok."
+);
+
+return;
+
+}
+
+const career =
+JSON.parse(data);
+
+
+document
+.getElementById("careerClubName")
+.textContent =
+career.club;
+
+document
+.getElementById("careerLeague")
+.textContent =
+career.league;
+
+document
+.getElementById("careerBudget")
+.textContent =
+formatMoney(career.budget);
+
+document
+.getElementById("careerRep")
+.textContent =
+career.reputation;
+
+document
+.getElementById("careerDate")
+.textContent =
+formatDate(career.date);
+
+showPage("career");
+
+}
+
+
+/* =========================
+   KADRO
+========================= */
+
+function showSquad(){
+
+const careerData =
+localStorage.getItem(
+"sametCareer"
+);
+
+if(!careerData){
+
+alert(
+"Önce kariyer başlatmalısınız."
+);
+
+return;
+
+}
+
+const career =
+JSON.parse(careerData);
+
+const squad =
+getPlayersByClub(
+career.club
+);
+
+
+const panel =
+document.getElementById(
+"squadPanel"
+);
+
+const list =
+document.getElementById(
+"squadList"
+);
+
+panel.classList.remove(
+"hidden"
+);
+
+document
+.getElementById("playerPanel")
+.classList.add("hidden");
+
+
+list.innerHTML = "";
+
+
+if(squad.length === 0){
+
+list.innerHTML = `
+
+<p>
+Bu kulüpte henüz oyuncu bulunmuyor.
+</p>
+
+`;
+
+return;
+
+}
+
+
+squad.forEach(player => {
+
+const div =
+document.createElement("div");
+
+div.className = "player";
+
+div.innerHTML = `
+
+<div class="player-name">
+
+${player.name}
+
+</div>
+
+<div class="player-info">
+
+${player.position}
+•
+${player.age} yaş
+•
+⭐ ${player.rating}
+•
+<span class="potential">
+POT ${player.potential}
+</span>
+
+</div>
+
+`;
+
+div.onclick =
+() => showPlayer(player.id);
+
+list.appendChild(div);
+
+});
+
+}
+
+
+/* =========================
+   OYUNCU PROFİLİ
+========================= */
+
+function showPlayer(id){
+
+const player =
+getPlayer(id);
+
+if(!player){
+
+return;
+
+}
+
+
+const panel =
+document.getElementById(
+"playerPanel"
+);
+
+const profile =
+document.getElementById(
+"playerProfile"
+);
+
+document
+.getElementById("squadPanel")
+.classList.add("hidden");
+
+panel.classList.remove(
+"hidden"
+);
+
+
+profile.innerHTML = `
+
+<h2>
+${player.name}
+</h2>
+
+<p class="small">
+${player.nationality}
+•
+${player.position}
+•
+${player.age} yaş
+</p>
+
+<div class="stats">
+
+<div class="stat">
+
+<div class="label">
+⭐ REYTİNG
+</div>
+
+<div class="rating">
+${player.rating}
+</div>
+
+</div>
+
+
+<div class="stat">
+
+<div class="label">
+📈 POTANSİYEL
+</div>
+
+<div class="rating potential">
+${player.potential}
+</div>
+
+</div>
+
+
+<div class="stat">
+
+<div class="label">
+💰 PİYASA DEĞERİ
+</div>
+
+<div class="value">
+${formatMoney(player.value)}
+</div>
+
+</div>
+
+
+<div class="stat">
+
+<div class="label">
+💵 MAAŞ
+</div>
+
+<div class="value">
+${formatMoney(player.wage)}
+</div>
+
+</div>
+
+</div>
+
+
+<h3>🧬 Oyuncu DNA</h3>
+
+<div class="stat">
+
+<div class="label">
+Teknik
+</div>
+
+<div class="value">
+${player.technical}
+</div>
+
+<div class="progress">
+
+<div
+class="progress-bar"
+style="width:${player.technical}%"
+></div>
+
+</div>
+
+</div>
+
+
+<div class="stat">
+
+<div class="label">
+Fizik
+</div>
+
+<div class="value">
+${player.physical}
+</div>
+
+<div class="progress">
+
+<div
+class="progress-bar"
+style="width:${player.physical}%"
+></div>
+
+</div>
+
+</div>
+
+
+<div class="stat">
+
+<div class="label">
+Zihinsel
+</div>
+
+<div class="value">
+${player.mental}
+</div>
+
+<div class="progress">
+
+<div
+class="progress-bar"
+style="width:${player.mental}%"
+></div>
+
+</div>
+
+</div>
+
+
+<h3>🧠 Kişilik</h3>
+
+<p>
+<strong>${player.personality}</strong>
+</p>
+
+<p>
+Hırs: ${player.ambition}
+</p>
+
+<p>
+Profesyonellik: ${player.professionalism}
+</p>
+
+
+<h3>🎯 Kariyer Hedefi</h3>
+
+<p>
+${player.careerGoal}
+</p>
+
+
+<h3>📄 Sözleşme</h3>
+
+<p>
+Sözleşme bitişi:
+${player.contractEnd}
+</p>
+
+`;
+
+
+}
+
+
+/* =========================
+   PANEL KAPAT
+========================= */
+
+function closePanel(id){
+
+document
+.getElementById(id)
+.classList.add("hidden");
+
+}
+
+
+/* =========================
+   YAKINDA
+========================= */
+
+function comingSoon(name){
+
+alert(
+name +
+" V0.4 sürümünde aktif olacak."
+);
+
+}
+
+
+/* =========================
+   PARA
+========================= */
+
+function formatMoney(number){
+
+return "€" +
+new Intl.NumberFormat(
+"de-DE"
+).format(number);
+
+}
+
+
+/* =========================
+   TARİH
+========================= */
+
+function formatDate(value){
+
+return new Date(value)
+.toLocaleDateString(
+"tr-TR",
+{
+day:"numeric",
+month:"long",
+year:"numeric"
+}
+);
+
+}
+
+</script>
+
+</body>
+</html>
