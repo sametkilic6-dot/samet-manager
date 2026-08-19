@@ -1,8 +1,15 @@
 <!DOCTYPE html>
 <html lang="tr">
+
 <head>
+
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<meta
+name="viewport"
+content="width=device-width, initial-scale=1.0"
+>
+
 <title>Samet Manager</title>
 
 <style>
@@ -19,7 +26,8 @@ font-family:Arial,sans-serif;
 }
 
 button,
-input{
+input,
+select{
 font:inherit;
 }
 
@@ -75,14 +83,23 @@ background:#334155;
 display:none;
 }
 
-input{
+input,
+select{
 width:100%;
 padding:14px;
+margin-top:8px;
 border-radius:12px;
 border:1px solid #334155;
 background:#091526;
 color:white;
 outline:none;
+}
+
+label{
+display:block;
+margin-top:12px;
+font-size:13px;
+color:#94a3b8;
 }
 
 .club,
@@ -106,6 +123,7 @@ font-weight:bold;
 color:#94a3b8;
 margin-top:6px;
 font-size:14px;
+line-height:1.6;
 }
 
 .stats{
@@ -175,7 +193,67 @@ font-size:13px;
 color:#94a3b8;
 }
 
+.filter-grid{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:10px;
+}
+
+.checkbox-row{
+display:flex;
+align-items:center;
+gap:8px;
+margin-top:12px;
+color:#cbd5e1;
+font-size:13px;
+}
+
+.checkbox-row input{
+width:auto;
+margin:0;
+}
+
+.result-count{
+font-size:13px;
+color:#94a3b8;
+margin-top:15px;
+}
+
+.transfer-chance{
+font-size:19px;
+font-weight:bold;
+margin-top:10px;
+}
+
+.chance-good{
+color:#22c55e;
+}
+
+.chance-medium{
+color:#facc15;
+}
+
+.chance-bad{
+color:#ef4444;
+}
+
+.transfer-tag{
+display:inline-block;
+padding:5px 8px;
+border-radius:8px;
+background:#1e293b;
+font-size:11px;
+margin-top:6px;
+margin-right:4px;
+color:#cbd5e1;
+}
+
+.offer-button{
+background:#2563eb;
+}
+
 </style>
+
 </head>
 
 <body>
@@ -193,7 +271,9 @@ color:#94a3b8;
 
 <h1>⚽ Samet Manager</h1>
 
-<p>Tek kişilik futbol menajerlik oyunu</p>
+<p>
+Tek kişilik futbol menajerlik oyunu
+</p>
 
 </div>
 
@@ -218,10 +298,10 @@ onclick="loadCareer()"
 
 <div class="card">
 
-<h2>ℹ️ V0.3</h2>
+<h2>ℹ️ V0.4</h2>
 
 <p class="small">
-Kariyer, kulüp, kadro ve oyuncu sistemi aktif.
+Kariyer, kulüp, kadro, oyuncu ve transfer sistemi aktif.
 </p>
 
 </div>
@@ -230,7 +310,7 @@ Kariyer, kulüp, kadro ve oyuncu sistemi aktif.
 
 
 <!-- ========================= -->
-<!-- KULÜP SEÇİMİ -->
+<!-- KULÜPLER -->
 <!-- ========================= -->
 
 <section id="clubs" class="hidden">
@@ -360,7 +440,6 @@ onclick="startCareer()"
 
 </div>
 
-
 <div class="card">
 
 <h2 id="careerClubName"></h2>
@@ -413,7 +492,7 @@ Hocam, yeni sezon için hazırlıklara başlayabilirsiniz.
 </p>
 
 <p class="small">
-Bugünün gündemi: Kadroyu incele, transfer hedeflerini belirle ve antrenman planını oluştur.
+Kadroyu incele, transfer hedeflerini belirle ve takımını güçlendir.
 </p>
 
 </div>
@@ -429,39 +508,27 @@ Bugünün gündemi: Kadroyu incele, transfer hedeflerini belirle ve antrenman pl
 
 <div class="menu-grid">
 
-<button
-onclick="showSquad()"
->
+<button onclick="showSquad()">
 👥 Kadro
 </button>
 
-<button
-onclick="comingSoon('Transfer Merkezi')"
->
+<button onclick="showTransfer()">
 🔄 Transfer
 </button>
 
-<button
-onclick="comingSoon('Antrenman Merkezi')"
->
+<button onclick="comingSoon('Antrenman Merkezi')">
 🏋️ Antrenman
 </button>
 
-<button
-onclick="comingSoon('Scout Merkezi')"
->
+<button onclick="comingSoon('Scout Merkezi')">
 🔎 Scout
 </button>
 
-<button
-onclick="comingSoon('Futbol Gündemi')"
->
+<button onclick="comingSoon('Futbol Gündemi')">
 📱 Gündem
 </button>
 
-<button
-onclick="comingSoon('Maç Merkezi')"
->
+<button onclick="comingSoon('Maç Merkezi')">
 ⚽ Maç
 </button>
 
@@ -470,7 +537,9 @@ onclick="comingSoon('Maç Merkezi')"
 </div>
 
 
+<!-- ========================= -->
 <!-- KADRO -->
+<!-- ========================= -->
 
 <div
 id="squadPanel"
@@ -491,7 +560,9 @@ onclick="closePanel('squadPanel')"
 </div>
 
 
+<!-- ========================= -->
 <!-- OYUNCU PROFİLİ -->
+<!-- ========================= -->
 
 <div
 id="playerPanel"
@@ -500,7 +571,7 @@ class="card hidden"
 
 <button
 class="back"
-onclick="closePanel('playerPanel')"
+onclick="backToSquad()"
 >
 ← Kadroya Dön
 </button>
@@ -510,12 +581,259 @@ onclick="closePanel('playerPanel')"
 </div>
 
 
+<!-- ========================= -->
+<!-- TRANSFER MERKEZİ -->
+<!-- ========================= -->
+
+<div
+id="transferPanel"
+class="card hidden"
+>
+
+<button
+class="back"
+onclick="closeTransfer()"
+>
+← Kariyere Dön
+</button>
+
+<h2>🔄 Transfer Merkezi</h2>
+
+<p class="small">
+Oyuncu ara, filtrele ve transfer ihtimalini değerlendir.
+</p>
+
+
+<label>
+🔎 Oyuncu Ara
+</label>
+
+<input
+id="transferSearch"
+placeholder="Oyuncu adı..."
+oninput="renderTransfer()"
+>
+
+
+<div class="filter-grid">
+
+<div>
+
+<label>
+🎂 Min. Yaş
+</label>
+
+<input
+id="minAge"
+type="number"
+value="16"
+min="16"
+max="40"
+oninput="renderTransfer()"
+>
+
+</div>
+
+<div>
+
+<label>
+🎂 Max. Yaş
+</label>
+
+<input
+id="maxAge"
+type="number"
+value="40"
+min="16"
+max="40"
+oninput="renderTransfer()"
+>
+
+</div>
+
+<div>
+
+<label>
+⭐ Min. GEN
+</label>
+
+<input
+id="minRating"
+type="number"
+value="1"
+min="1"
+max="99"
+oninput="renderTransfer()"
+>
+
+</div>
+
+<div>
+
+<label>
+⭐ Max. GEN
+</label>
+
+<input
+id="maxRating"
+type="number"
+value="99"
+min="1"
+max="99"
+oninput="renderTransfer()"
+>
+
+</div>
+
+</div>
+
+
+<label>
+⚽ Mevki
+</label>
+
+<select
+id="positionFilter"
+onchange="renderTransfer()"
+>
+
+<option value="">
+Tüm Mevkiler
+</option>
+
+<option value="GK">GK</option>
+<option value="CB">CB</option>
+<option value="LB">LB</option>
+<option value="RB">RB</option>
+<option value="CDM">CDM</option>
+<option value="CM">CM</option>
+<option value="CAM">CAM</option>
+<option value="LM">LM</option>
+<option value="RM">RM</option>
+<option value="LW">LW</option>
+<option value="RW">RW</option>
+<option value="ST">ST</option>
+
+</select>
+
+
+<label>
+🌍 Ülke
+</label>
+
+<select
+id="countryFilter"
+onchange="renderTransfer()"
+>
+
+<option value="">
+Tüm Ülkeler
+</option>
+
+</select>
+
+
+<label>
+🏟️ Kulüp
+</label>
+
+<select
+id="clubFilter"
+onchange="renderTransfer()"
+>
+
+<option value="">
+Tüm Kulüpler
+</option>
+
+</select>
+
+
+<label>
+💰 Maksimum Bonservis
+</label>
+
+<input
+id="maxValue"
+type="number"
+value="1000000000"
+min="0"
+oninput="renderTransfer()"
+>
+
+
+<div class="checkbox-row">
+
+<input
+type="checkbox"
+id="transferListed"
+onchange="renderTransfer()"
+>
+
+<span>
+📋 Transfer listesindekiler
+</span>
+
+</div>
+
+
+<div class="checkbox-row">
+
+<input
+type="checkbox"
+id="loanListed"
+onchange="renderTransfer()"
+>
+
+<span>
+🔵 Kiralık oyuncular
+</span>
+
+</div>
+
+
+<div class="checkbox-row">
+
+<input
+type="checkbox"
+id="freeAgents"
+onchange="renderTransfer()"
+>
+
+<span>
+🆓 Bonservissiz oyuncular
+</span>
+
+</div>
+
+
+<button
+class="primary"
+onclick="renderTransfer()"
+>
+🔎 Oyuncuları Ara
+</button>
+
+
+<div
+id="transferCount"
+class="result-count"
+></div>
+
+
+<div id="transferList"></div>
+
+</div>
+
+
 </section>
 
 </div>
 
 
+<!-- ========================= -->
 <!-- PLAYERS.JS -->
+<!-- ========================= -->
 
 <script src="players.js"></script>
 
@@ -523,7 +841,7 @@ onclick="closePanel('playerPanel')"
 <script>
 
 /* =========================
-   KULÜPLER
+KULÜPLER
 ========================= */
 
 const clubs = [
@@ -601,7 +919,7 @@ let selectedClub = null;
 
 
 /* =========================
-   SAYFA SİSTEMİ
+SAYFA
 ========================= */
 
 function showPage(page){
@@ -628,7 +946,7 @@ renderClubs();
 
 
 /* =========================
-   KULÜP LİSTESİ
+KULÜPLER
 ========================= */
 
 function renderClubs(){
@@ -684,7 +1002,7 @@ list.appendChild(div);
 
 
 /* =========================
-   KULÜP SEÇ
+KULÜP SEÇ
 ========================= */
 
 function selectClub(id){
@@ -732,7 +1050,7 @@ showPage("clubDetail");
 
 
 /* =========================
-   KARİYER BAŞLAT
+KARİYER
 ========================= */
 
 function startCareer(){
@@ -759,7 +1077,6 @@ date:"2026-08-19"
 
 };
 
-
 localStorage.setItem(
 "sametCareer",
 JSON.stringify(career)
@@ -769,10 +1086,6 @@ loadCareer();
 
 }
 
-
-/* =========================
-   KARİYER YÜKLE
-========================= */
 
 function loadCareer(){
 
@@ -793,7 +1106,6 @@ return;
 
 const career =
 JSON.parse(data);
-
 
 document
 .getElementById("careerClubName")
@@ -826,7 +1138,7 @@ showPage("career");
 
 
 /* =========================
-   KADRO
+KADRO
 ========================= */
 
 function showSquad(){
@@ -854,25 +1166,22 @@ getPlayersByClub(
 career.club
 );
 
-
-const panel =
-document.getElementById(
-"squadPanel"
-);
-
-const list =
-document.getElementById(
-"squadList"
-);
-
-panel.classList.remove(
-"hidden"
-);
+document
+.getElementById("squadPanel")
+.classList.remove("hidden");
 
 document
 .getElementById("playerPanel")
 .classList.add("hidden");
 
+document
+.getElementById("transferPanel")
+.classList.add("hidden");
+
+const list =
+document.getElementById(
+"squadList"
+);
 
 list.innerHTML = "";
 
@@ -880,11 +1189,9 @@ list.innerHTML = "";
 if(squad.length === 0){
 
 list.innerHTML = `
-
 <p>
 Bu kulüpte henüz oyuncu bulunmuyor.
 </p>
-
 `;
 
 return;
@@ -902,9 +1209,7 @@ div.className = "player";
 div.innerHTML = `
 
 <div class="player-name">
-
 ${player.name}
-
 </div>
 
 <div class="player-info">
@@ -934,7 +1239,7 @@ list.appendChild(div);
 
 
 /* =========================
-   OYUNCU PROFİLİ
+OYUNCU
 ========================= */
 
 function showPlayer(id){
@@ -948,23 +1253,22 @@ return;
 
 }
 
-
-const panel =
-document.getElementById(
-"playerPanel"
-);
-
-const profile =
-document.getElementById(
-"playerProfile"
-);
-
 document
 .getElementById("squadPanel")
 .classList.add("hidden");
 
-panel.classList.remove(
-"hidden"
+document
+.getElementById("transferPanel")
+.classList.add("hidden");
+
+document
+.getElementById("playerPanel")
+.classList.remove("hidden");
+
+
+const profile =
+document.getElementById(
+"playerProfile"
 );
 
 
@@ -975,12 +1279,15 @@ ${player.name}
 </h2>
 
 <p class="small">
+
 ${player.nationality}
 •
 ${player.position}
 •
 ${player.age} yaş
+
 </p>
+
 
 <div class="stats">
 
@@ -1038,7 +1345,10 @@ ${formatMoney(player.wage)}
 </div>
 
 
-<h3>🧬 Oyuncu DNA</h3>
+<h3>
+🧬 Oyuncu DNA
+</h3>
+
 
 <div class="stat">
 
@@ -1106,10 +1416,14 @@ style="width:${player.mental}%"
 </div>
 
 
-<h3>🧠 Kişilik</h3>
+<h3>
+🧠 Kişilik
+</h3>
 
 <p>
-<strong>${player.personality}</strong>
+<strong>
+${player.personality}
+</strong>
 </p>
 
 <p>
@@ -1117,18 +1431,23 @@ Hırs: ${player.ambition}
 </p>
 
 <p>
-Profesyonellik: ${player.professionalism}
+Profesyonellik:
+${player.professionalism}
 </p>
 
 
-<h3>🎯 Kariyer Hedefi</h3>
+<h3>
+🎯 Kariyer Hedefi
+</h3>
 
 <p>
 ${player.careerGoal}
 </p>
 
 
-<h3>📄 Sözleşme</h3>
+<h3>
+📄 Sözleşme
+</h3>
 
 <p>
 Sözleşme bitişi:
@@ -1137,12 +1456,862 @@ ${player.contractEnd}
 
 `;
 
+}
+
+
+/* =========================
+KADROYA DÖN
+========================= */
+
+function backToSquad(){
+
+document
+.getElementById("playerPanel")
+.classList.add("hidden");
+
+document
+.getElementById("squadPanel")
+.classList.remove("hidden");
 
 }
 
 
 /* =========================
-   PANEL KAPAT
+TRANSFER
+========================= */
+
+function showTransfer(){
+
+document
+.getElementById("squadPanel")
+.classList.add("hidden");
+
+document
+.getElementById("playerPanel")
+.classList.add("hidden");
+
+document
+.getElementById("transferPanel")
+.classList.remove("hidden");
+
+populateTransferFilters();
+
+renderTransfer();
+
+}
+
+
+/* =========================
+TRANSFER FİLTRELERİ
+========================= */
+
+function populateTransferFilters(){
+
+if(
+typeof players === "undefined"
+){
+
+return;
+
+}
+
+
+const countrySelect =
+document.getElementById(
+"countryFilter"
+);
+
+const clubSelect =
+document.getElementById(
+"clubFilter"
+);
+
+
+const oldCountry =
+countrySelect.value;
+
+const oldClub =
+clubSelect.value;
+
+
+countrySelect.innerHTML = `
+<option value="">
+Tüm Ülkeler
+</option>
+`;
+
+clubSelect.innerHTML = `
+<option value="">
+Tüm Kulüpler
+</option>
+`;
+
+
+const countries =
+[
+...new Set(
+players.map(
+player =>
+player.country ||
+player.nationality ||
+"Belirsiz"
+)
+)
+].sort();
+
+
+const playerClubs =
+[
+...new Set(
+players.map(
+player =>
+player.club ||
+"Serbest Oyuncu"
+)
+)
+].sort();
+
+
+countries.forEach(country => {
+
+const option =
+document.createElement("option");
+
+option.value = country;
+
+option.textContent = country;
+
+countrySelect.appendChild(option);
+
+});
+
+
+playerClubs.forEach(club => {
+
+const option =
+document.createElement("option");
+
+option.value = club;
+
+option.textContent = club;
+
+clubSelect.appendChild(option);
+
+});
+
+
+if(
+countries.includes(oldCountry)
+){
+
+countrySelect.value =
+oldCountry;
+
+}
+
+
+if(
+playerClubs.includes(oldClub)
+){
+
+clubSelect.value =
+oldClub;
+
+}
+
+}
+
+
+/* =========================
+TRANSFER LİSTESİ
+========================= */
+
+function renderTransfer(){
+
+if(
+typeof players === "undefined"
+){
+
+document
+.getElementById("transferList")
+.innerHTML = `
+<p>
+Oyuncu verileri yüklenemedi.
+</p>
+`;
+
+return;
+
+}
+
+
+const search =
+document
+.getElementById("transferSearch")
+.value
+.toLowerCase()
+.trim();
+
+
+const minAge =
+Number(
+document
+.getElementById("minAge")
+.value
+) || 16;
+
+
+const maxAge =
+Number(
+document
+.getElementById("maxAge")
+.value
+) || 40;
+
+
+const minRating =
+Number(
+document
+.getElementById("minRating")
+.value
+) || 1;
+
+
+const maxRating =
+Number(
+document
+.getElementById("maxRating")
+.value
+) || 99;
+
+
+const position =
+document
+.getElementById("positionFilter")
+.value;
+
+
+const country =
+document
+.getElementById("countryFilter")
+.value;
+
+
+const club =
+document
+.getElementById("clubFilter")
+.value;
+
+
+const maxValue =
+Number(
+document
+.getElementById("maxValue")
+.value
+) || 999999999999;
+
+
+const onlyListed =
+document
+.getElementById("transferListed")
+.checked;
+
+
+const onlyLoan =
+document
+.getElementById("loanListed")
+.checked;
+
+
+const onlyFree =
+document
+.getElementById("freeAgents")
+.checked;
+
+
+const results =
+players.filter(player => {
+
+const playerName =
+(player.name || "")
+.toLowerCase();
+
+const playerCountry =
+player.country ||
+player.nationality ||
+"Belirsiz";
+
+const playerClub =
+player.club ||
+"Serbest Oyuncu";
+
+const playerPosition =
+player.position ||
+"";
+
+const playerAge =
+Number(player.age) || 0;
+
+const playerRating =
+Number(player.rating) || 0;
+
+const playerValue =
+Number(player.value) || 0;
+
+
+if(
+search &&
+!playerName.includes(search)
+){
+
+return false;
+
+}
+
+
+if(
+playerAge < minAge ||
+playerAge > maxAge
+){
+
+return false;
+
+}
+
+
+if(
+playerRating < minRating ||
+playerRating > maxRating
+){
+
+return false;
+
+}
+
+
+if(
+position &&
+playerPosition !== position
+){
+
+return false;
+
+}
+
+
+if(
+country &&
+playerCountry !== country
+){
+
+return false;
+
+}
+
+
+if(
+club &&
+playerClub !== club
+){
+
+return false;
+
+}
+
+
+if(
+playerValue > maxValue
+){
+
+return false;
+
+}
+
+
+if(
+onlyListed &&
+player.transferListed !== true
+){
+
+return false;
+
+}
+
+
+if(
+onlyLoan &&
+player.loanListed !== true
+){
+
+return false;
+
+}
+
+
+if(
+onlyFree &&
+player.freeAgent !== true
+){
+
+return false;
+
+}
+
+
+return true;
+
+});
+
+
+const list =
+document.getElementById(
+"transferList"
+);
+
+const count =
+document.getElementById(
+"transferCount"
+);
+
+
+count.textContent =
+results.length +
+" oyuncu bulundu";
+
+
+list.innerHTML = "";
+
+
+if(
+results.length === 0
+){
+
+list.innerHTML = `
+
+<div class="player">
+
+<div class="player-name">
+Oyuncu bulunamadı
+</div>
+
+<div class="player-info">
+Filtreleri genişletmeyi deneyin.
+</div>
+
+</div>
+
+`;
+
+return;
+
+}
+
+
+results.forEach(player => {
+
+const chance =
+calculateTransferChance(
+player
+);
+
+
+const chanceClass =
+getChanceClass(chance);
+
+
+const playerClub =
+player.club ||
+"Serbest Oyuncu";
+
+
+const country =
+player.country ||
+player.nationality ||
+"Belirsiz";
+
+
+const value =
+Number(player.value) || 0;
+
+
+const div =
+document.createElement("div");
+
+div.className = "player";
+
+
+div.innerHTML = `
+
+<div class="player-name">
+${player.name}
+</div>
+
+
+<div class="player-info">
+
+${playerClub}
+•
+${country}
+
+<br>
+
+⚽ ${player.position}
+•
+🎂 ${player.age} yaş
+•
+⭐ GEN ${player.rating}
+
+<br>
+
+📈 Potansiyel:
+${player.potential}
+
+<br>
+
+💰 Piyasa:
+${formatMoney(value)}
+
+<br>
+
+${
+player.transferListed
+?
+'<span class="transfer-tag">📋 Transfer Listesinde</span>'
+:
+''
+}
+
+${
+player.loanListed
+?
+'<span class="transfer-tag">🔵 Kiralık</span>'
+:
+''
+}
+
+${
+player.freeAgent
+?
+'<span class="transfer-tag">🆓 Bonservissiz</span>'
+:
+''
+}
+
+</div>
+
+
+<div
+class="transfer-chance ${chanceClass}"
+>
+
+🎯 Gelme ihtimali:
+%${chance}
+
+</div>
+
+
+<button
+class="offer-button"
+onclick="
+event.stopPropagation();
+makeTransferOffer(${player.id})
+"
+>
+
+📨 Transfer Teklifi Yap
+
+</button>
+
+`;
+
+
+div.onclick =
+() => showPlayer(player.id);
+
+
+list.appendChild(div);
+
+});
+
+}
+
+
+/* =========================
+TRANSFER İHTİMALİ
+========================= */
+
+function calculateTransferChance(player){
+
+if(!selectedClub){
+
+return 50;
+
+}
+
+
+let score = 50;
+
+
+const clubRep =
+selectedClub.reputation;
+
+
+const rating =
+Number(player.rating) || 0;
+
+
+/* KULÜP GÜCÜ */
+
+if(
+clubRep >= rating + 15
+){
+
+score += 25;
+
+}
+else if(
+clubRep >= rating
+){
+
+score += 15;
+
+}
+else if(
+clubRep >= rating - 10
+){
+
+score += 5;
+
+}
+else{
+
+score -= 20;
+
+}
+
+
+/* GENÇ OYUNCU */
+
+if(
+player.age <= 21 &&
+clubRep >= 75
+){
+
+score += 8;
+
+}
+
+
+/* YILDIZ OYUNCU */
+
+if(
+rating >= 88 &&
+clubRep < 90
+){
+
+score -= 20;
+
+}
+
+
+/* POTANSİYEL */
+
+if(
+player.potential >= 85 &&
+player.age <= 23 &&
+clubRep >= 80
+){
+
+score += 5;
+
+}
+
+
+/* KARİYER HEDEFİ */
+
+const goal =
+(player.careerGoal || "")
+.toLowerCase();
+
+
+if(
+goal.includes("şampiyonlar") ||
+goal.includes("avrupa")
+){
+
+if(
+clubRep >= 85
+){
+
+score += 8;
+
+}
+
+}
+
+
+/* TRANSFER LİSTESİ */
+
+if(
+player.transferListed === true
+){
+
+score += 8;
+
+}
+
+
+/* KİRALIK */
+
+if(
+player.loanListed === true
+){
+
+score += 5;
+
+}
+
+
+/* SERBEST */
+
+if(
+player.freeAgent === true
+){
+
+score += 12;
+
+}
+
+
+/* KÜÇÜK RASTGELELİK */
+
+score +=
+Math.floor(
+Math.random() * 7
+) - 3;
+
+
+return Math.max(
+5,
+Math.min(
+95,
+Math.round(score)
+)
+);
+
+}
+
+
+/* =========================
+İHTİMAL RENGİ
+========================= */
+
+function getChanceClass(chance){
+
+if(chance >= 70){
+
+return "chance-good";
+
+}
+
+if(chance >= 40){
+
+return "chance-medium";
+
+}
+
+return "chance-bad";
+
+}
+
+
+/* =========================
+TRANSFER TEKLİFİ
+========================= */
+
+function makeTransferOffer(id){
+
+const player =
+getPlayer(id);
+
+
+if(!player){
+
+alert(
+"Oyuncu bulunamadı."
+);
+
+return;
+
+}
+
+
+const chance =
+calculateTransferChance(
+player
+);
+
+
+let message =
+player.name +
+" için transfer görüşmesi başlatılıyor.\n\n";
+
+
+message +=
+"🎯 Gelme ihtimali: %" +
+chance;
+
+
+if(chance >= 80){
+
+message +=
+"\n\n🟢 Oyuncu transferine oldukça sıcak.";
+
+}
+else if(chance >= 60){
+
+message +=
+"\n\n🟡 Oyuncu görüşmeye açık.";
+
+}
+else if(chance >= 40){
+
+message +=
+"\n\n🟠 Oyuncuyu ikna etmek zor olabilir.";
+
+}
+else{
+
+message +=
+"\n\n🔴 Oyuncunun ilgisi düşük.";
+
+}
+
+
+message +=
+"\n\nBonservis ve maaş pazarlığı sonraki aşamada açılacak.";
+
+
+alert(message);
+
+}
+
+
+/* =========================
+TRANSFER KAPAT
+========================= */
+
+function closeTransfer(){
+
+document
+.getElementById("transferPanel")
+.classList.add("hidden");
+
+}
+
+
+/* =========================
+PANEL
 ========================= */
 
 function closePanel(id){
@@ -1155,21 +2324,21 @@ document
 
 
 /* =========================
-   YAKINDA
+YAKINDA
 ========================= */
 
 function comingSoon(name){
 
 alert(
 name +
-" V0.4 sürümünde aktif olacak."
+" V0.5 sürümünde aktif olacak."
 );
 
 }
 
 
 /* =========================
-   PARA
+PARA
 ========================= */
 
 function formatMoney(number){
@@ -1177,13 +2346,15 @@ function formatMoney(number){
 return "€" +
 new Intl.NumberFormat(
 "de-DE"
-).format(number);
+).format(
+Number(number) || 0
+);
 
 }
 
 
 /* =========================
-   TARİH
+TARİH
 ========================= */
 
 function formatDate(value){
@@ -1203,4 +2374,5 @@ year:"numeric"
 </script>
 
 </body>
+
 </html>
