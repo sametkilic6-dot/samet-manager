@@ -1,847 +1,910 @@
-/*
-====================================================
-SAMET MANAGER
-PLAYER DATABASE V0.4
-====================================================
+/* ============================================================
+   ⚽ SAMET MANAGER
+   PROFESSIONAL PLAYER DATABASE ENGINE
+   ============================================================
 
-FC 26 başlangıç veri yapısı:
-- Overall / GEN
-- Pace
-- Shooting
-- Passing
-- Dribbling
-- Defending
-- Physical
+   Amaç:
+   - 17.000+ oyuncu desteklemek
+   - FC/Career Mode tarzı oyuncu verisi
+   - Gerçek kulüp bağlantıları
+   - Transfer sistemi
+   - Oyuncu profili
+   - Potansiyel
+   - Maaş
+   - Piyasa değeri
+   - Oyuncu DNA
+   - Kişilik
+   - Sözleşme
+   - Fotoğraf sistemi
+   - Gelecekte veri paketleri ekleyebilme
 
-Samet Manager özel verileri:
-- Potential
-- Value
-- Wage
-- Contract
-- Personality
-- Ambition
-- Professionalism
-- Career Goal
-- Transfer status
-- Loan status
-- Free agent status
-- Transfer preference
+   index.html ile uyumludur.
 
-Not:
-Bu veri tabanı geliştirme/test için başlangıç oyuncu
-setidir. Gerçek oyunda daha geniş veri seti
-eklendiğinde aynı yapı kullanılacaktır.
-====================================================
-*/
+   Gerekli fonksiyonlar:
+   getPlayer(id)
+   getPlayersByClub(club)
+   ============================================================ */
 
+
+/* ============================================================
+   DATABASE VERSION
+   ============================================================ */
+
+const PLAYER_DATABASE_VERSION = "1.0.0";
+
+const PLAYER_DATABASE_SIZE = 17000;
+
+
+/* ============================================================
+   OYUNCU VERİ TABANI
+   ============================================================
+
+   Şimdilik örnek veri yapısı kullanılıyor.
+
+   Gerçek 17.000+ oyuncu veri paketi daha sonra bu yapıya
+   aktarılabilir.
+   ============================================================ */
 
 const players = [
 
-/* ==================================================
-   GALATASARAY
-================================================== */
-
 {
-id:1001,
-name:"Victor Osimhen",
-club:"Galatasaray",
-country:"Nijerya",
-nationality:"Nijerya",
+    id: 1,
 
-age:27,
-position:"ST",
+    name: "Oyuncu Örneği",
 
-rating:89,
-potential:89,
+    firstName: "Oyuncu",
+    lastName: "Örneği",
 
-pace:91,
-shooting:88,
-passing:65,
-dribbling:83,
-defending:43,
-physical:86,
+    nationality: "Türkiye",
+    country: "Türkiye",
 
-value:75000000,
-wage:8000000,
+    club: "Galatasaray",
 
-contractEnd:2029,
+    league: "Süper Lig",
 
-personality:"Hırslı",
-ambition:96,
-professionalism:91,
+    position: "CM",
 
-careerGoal:"Dünyanın en üst seviyesinde golcü olmak",
+    age: 22,
 
-transferListed:false,
-loanListed:false,
-freeAgent:false,
+    birthDate: "2004-01-01",
 
-preferredRole:"Ana Santrfor",
-playingTime:"Temel Oyuncu"
+    rating: 75,
 
-},
+    potential: 82,
 
-{
-id:1002,
-name:"Mauro Icardi",
-club:"Galatasaray",
-country:"Arjantin",
-nationality:"Arjantin",
+    value: 5000000,
 
-age:33,
-position:"ST",
+    wage: 75000,
 
-rating:82,
-potential:82,
+    contractEnd: "2028-06-30",
 
-pace:67,
-shooting:88,
-passing:73,
-dribbling:80,
-defending:36,
-physical:72,
+    transferListed: false,
 
-value:12000000,
-wage:6000000,
+    loanListed: false,
 
-contractEnd:2028,
+    freeAgent: false,
 
-personality:"Lider",
-ambition:82,
-professionalism:78,
+    /* -------------------------
+       OYUNCU DNA
+       ------------------------- */
 
-careerGoal:"Kariyerini üst seviyede tamamlamak",
+    technical: 78,
 
-transferListed:false,
-loanListed:false,
-freeAgent:false,
+    physical: 74,
 
-preferredRole:"Ana Santrfor",
-playingTime:"Temel Oyuncu"
+    mental: 76,
 
-},
+    pace: 72,
 
-{
-id:1003,
-name:"Barış Alper Yılmaz",
-club:"Galatasaray",
-country:"Türkiye",
-nationality:"Türkiye",
+    shooting: 70,
 
-age:25,
-position:"RW",
+    passing: 82,
 
-rating:79,
-potential:84,
+    dribbling: 75,
 
-pace:92,
-shooting:73,
-passing:69,
-dribbling:78,
-defending:48,
-physical:90,
+    defending: 58,
 
-value:25000000,
-wage:2500000,
+    physicality: 74,
 
-contractEnd:2029,
+    stamina: 80,
 
-personality:"Çalışkan",
-ambition:90,
-professionalism:87,
+    strength: 68,
 
-careerGoal:"Avrupa'nın üst düzey liginde oynamak",
+    agility: 79,
 
-transferListed:false,
-loanListed:false,
-freeAgent:false,
+    balance: 81,
 
-preferredRole:"İlk 11",
-playingTime:"Temel Oyuncu"
+    reactions: 77,
 
-},
+    composure: 75,
 
-/* ==================================================
-   FENERBAHÇE
-================================================== */
+    vision: 84,
 
-{
-id:1101,
-name:"Edin Džeko",
-club:"Fenerbahçe",
-country:"Bosna Hersek",
-nationality:"Bosna Hersek",
+    positioning: 72,
 
-age:40,
-position:"ST",
+    interceptions: 55,
 
-rating:80,
-potential:80,
+    tackling: 52,
 
-pace:58,
-shooting:86,
-passing:76,
-dribbling:75,
-defending:45,
-physical:75,
+    crossing: 73,
 
-value:3000000,
-wage:4500000,
+    finishing: 65,
 
-contractEnd:2027,
+    longShots: 68,
 
-personality:"Lider",
-ambition:76,
-professionalism:94,
+    freeKick: 60,
 
-careerGoal:"Kariyerini kupalarla tamamlamak",
+    penalties: 55,
 
-transferListed:false,
-loanListed:false,
-freeAgent:false,
+    heading: 50,
 
-preferredRole:"Ana Santrfor",
-playingTime:"Temel Oyuncu"
+    jumping: 58,
 
-},
+    acceleration: 74,
 
-{
-id:1102,
-name:"İrfan Can Kahveci",
-club:"Fenerbahçe",
-country:"Türkiye",
-nationality:"Türkiye",
+    sprintSpeed: 71,
 
-age:31,
-position:"RW",
+    /* -------------------------
+       KİŞİLİK
+       ------------------------- */
 
-rating:78,
-potential:78,
+    personality: "Profesyonel",
 
-pace:72,
-shooting:79,
-passing:82,
-dribbling:76,
-defending:42,
-physical:62,
+    ambition: 82,
 
-value:9000000,
-wage:2500000,
+    professionalism: 85,
 
-contractEnd:2028,
+    loyalty: 70,
 
-personality:"Profesyonel",
-ambition:79,
-professionalism:86,
+    leadership: 65,
 
-careerGoal:"Kulübünde önemli bir rol sürdürmek",
+    temperament: 74,
 
-transferListed:false,
-loanListed:false,
-freeAgent:false,
+    workRate: "Yüksek",
 
-preferredRole:"Rotasyon",
-playingTime:"Rotasyon"
+    weakFoot: 4,
 
-},
+    skillMoves: 4,
 
-/* ==================================================
-   BEŞİKTAŞ
-================================================== */
+    preferredFoot: "Sağ",
 
-{
-id:1201,
-name:"Rafa Silva",
-club:"Beşiktaş",
-country:"Portekiz",
-nationality:"Portekiz",
+    /* -------------------------
+       KARİYER
+       ------------------------- */
 
-age:33,
-position:"CAM",
+    careerGoal: "Avrupa'nın üst düzey kulüplerinde oynamak",
 
-rating:83,
-potential:83,
+    role: "İlk 11",
 
-pace:84,
-shooting:80,
-passing:82,
-dribbling:91,
-defending:35,
-physical:58,
+    squadStatus: "Ana Kadro",
 
-value:15000000,
-wage:4500000,
+    /* -------------------------
+       TRANSFER
+       ------------------------- */
 
-contractEnd:2028,
+    transferInterest: 70,
 
-personality:"Yaratıcı",
-ambition:84,
-professionalism:88,
+    wageDemand: 90000,
 
-careerGoal:"Avrupa'da üst düzey futbol oynamak",
+    askingPrice: 5500000,
 
-transferListed:false,
-loanListed:false,
-freeAgent:false,
+    releaseClause: 15000000,
 
-preferredRole:"10 Numara",
-playingTime:"Temel Oyuncu"
+    /* -------------------------
+       FOTOĞRAF
+       ------------------------- */
 
-},
-
-{
-id:1202,
-name:"Semih Kılıçsoy",
-club:"Beşiktaş",
-country:"Türkiye",
-nationality:"Türkiye",
-
-age:20,
-position:"ST",
-
-rating:74,
-potential:86,
-
-pace:86,
-shooting:72,
-passing:61,
-dribbling:81,
-defending:32,
-physical:67,
-
-value:18000000,
-wage:1200000,
-
-contractEnd:2029,
-
-personality:"Hırslı",
-ambition:94,
-professionalism:82,
-
-careerGoal:"Avrupa'nın elit kulüplerinden birine transfer olmak",
-
-transferListed:false,
-loanListed:false,
-freeAgent:false,
-
-preferredRole:"İlk 11",
-playingTime:"Gelişim Oyuncusu"
-
-},
-
-/* ==================================================
-   EYÜPSPOR
-================================================== */
-
-{
-id:1301,
-name:"Caner Erkin",
-club:"Eyüpspor",
-country:"Türkiye",
-nationality:"Türkiye",
-
-age:37,
-position:"LB",
-
-rating:72,
-potential:72,
-
-pace:59,
-shooting:62,
-passing:82,
-dribbling:65,
-defending:52,
-physical:61,
-
-value:700000,
-wage:700000,
-
-contractEnd:2027,
-
-personality:"Lider",
-ambition:70,
-professionalism:90,
-
-careerGoal:"Tecrübesini genç oyunculara aktarmak",
-
-transferListed:false,
-loanListed:false,
-freeAgent:false,
-
-preferredRole:"Lider",
-playingTime:"Tecrübeli Oyuncu"
-
-},
-
-{
-id:1302,
-name:"Genç Yetenek",
-club:"Eyüpspor",
-country:"Türkiye",
-nationality:"Türkiye",
-
-age:18,
-position:"CAM",
-
-rating:61,
-potential:84,
-
-pace:78,
-shooting:58,
-passing:68,
-dribbling:75,
-defending:28,
-physical:48,
-
-value:1200000,
-wage:250000,
-
-contractEnd:2030,
-
-personality:"Gelişime Açık",
-ambition:95,
-professionalism:80,
-
-careerGoal:"Önce Süper Lig'de kendini kanıtlamak",
-
-transferListed:false,
-loanListed:false,
-freeAgent:false,
-
-preferredRole:"Yedek",
-playingTime:"Genç Yetenek"
-
-},
-
-/* ==================================================
-   REAL MADRID
-================================================== */
-
-{
-id:1401,
-name:"Kylian Mbappé",
-club:"Real Madrid",
-country:"Fransa",
-nationality:"Fransa",
-
-age:27,
-position:"ST",
-
-rating:91,
-potential:93,
-
-pace:97,
-shooting:90,
-passing:81,
-dribbling:92,
-defending:37,
-physical:76,
-
-value:180000000,
-wage:25000000,
-
-contractEnd:2031,
-
-personality:"Süperstar",
-ambition:99,
-professionalism:94,
-
-careerGoal:"Şampiyonlar Ligi ve Ballon d'Or",
-
-transferListed:false,
-loanListed:false,
-freeAgent:false,
-
-preferredRole:"Süperstar",
-playingTime:"Temel Oyuncu"
-
-},
-
-{
-id:1402,
-name:"Jude Bellingham",
-club:"Real Madrid",
-country:"İngiltere",
-nationality:"İngiltere",
-
-age:23,
-position:"CM",
-
-rating:90,
-potential:94,
-
-pace:80,
-shooting:87,
-passing:89,
-dribbling:90,
-defending:78,
-physical:82,
-
-value:150000000,
-wage:18000000,
-
-contractEnd:2030,
-
-personality:"Lider",
-ambition:98,
-professionalism:96,
-
-careerGoal:"Dünyanın en iyi orta saha oyuncusu olmak",
-
-transferListed:false,
-loanListed:false,
-freeAgent:false,
-
-preferredRole:"8 Numara",
-playingTime:"Temel Oyuncu"
-
-},
-
-/* ==================================================
-   MANCHESTER CITY
-================================================== */
-
-{
-id:1501,
-name:"Erling Haaland",
-club:"Manchester City",
-country:"Norveç",
-nationality:"Norveç",
-
-age:26,
-position:"ST",
-
-rating:90,
-potential:94,
-
-pace:88,
-shooting:91,
-passing:64,
-dribbling:80,
-defending:45,
-physical:91,
-
-value:190000000,
-wage:22000000,
-
-contractEnd:2034,
-
-personality:"Profesyonel",
-ambition:99,
-professionalism:96,
-
-careerGoal:"Gol rekorları ve Şampiyonlar Ligi",
-
-transferListed:false,
-loanListed:false,
-freeAgent:false,
-
-preferredRole:"Ana Santrfor",
-playingTime:"Temel Oyuncu"
-
-},
-
-{
-id:1502,
-name:"Rodri",
-club:"Manchester City",
-country:"İspanya",
-nationality:"İspanya",
-
-age:30,
-position:"CDM",
-
-rating:90,
-potential:90,
-
-pace:65,
-shooting:80,
-passing:86,
-dribbling:84,
-defending:86,
-physical:85,
-
-value:90000000,
-wage:16000000,
-
-contractEnd:2029,
-
-personality:"Profesyonel",
-ambition:94,
-professionalism:99,
-
-careerGoal:"Takımın oyun lideri olmak",
-
-transferListed:false,
-loanListed:false,
-freeAgent:false,
-
-preferredRole:"Ön Libero",
-playingTime:"Temel Oyuncu"
+    photo: "images/players/1.webp"
 
 }
 
 ];
 
 
-/* ==================================================
-   OYUNCU ARAMA
-================================================== */
+/* ============================================================
+   OYUNCU INDEXLERİ
+   ============================================================
+
+   17.000+ oyuncuda sürekli .find() kullanmak yerine Map
+   kullanıyoruz.
+
+   Böylece:
+
+   getPlayer(15000)
+
+   gibi sorgular çok daha hızlı çalışır.
+   ============================================================ */
+
+const playerById = new Map();
+
+const playersByClub = new Map();
+
+const playersByCountry = new Map();
+
+const playersByPosition = new Map();
+
+
+/* ============================================================
+   INDEX OLUŞTUR
+   ============================================================ */
+
+function buildPlayerIndexes(){
+
+    playerById.clear();
+
+    playersByClub.clear();
+
+    playersByCountry.clear();
+
+    playersByPosition.clear();
+
+
+    players.forEach(player => {
+
+        /* -------------------------
+           ID INDEX
+           ------------------------- */
+
+        playerById.set(
+            Number(player.id),
+            player
+        );
+
+
+        /* -------------------------
+           KULÜP INDEX
+           ------------------------- */
+
+        const club =
+            player.club ||
+            "Serbest Oyuncu";
+
+
+        if(!playersByClub.has(club)){
+
+            playersByClub.set(
+                club,
+                []
+            );
+
+        }
+
+
+        playersByClub
+            .get(club)
+            .push(player);
+
+
+        /* -------------------------
+           ÜLKE INDEX
+           ------------------------- */
+
+        const country =
+            player.country ||
+            player.nationality ||
+            "Belirsiz";
+
+
+        if(!playersByCountry.has(country)){
+
+            playersByCountry.set(
+                country,
+                []
+            );
+
+        }
+
+
+        playersByCountry
+            .get(country)
+            .push(player);
+
+
+        /* -------------------------
+           MEVKİ INDEX
+           ------------------------- */
+
+        const position =
+            player.position ||
+            "UNKNOWN";
+
+
+        if(!playersByPosition.has(position)){
+
+            playersByPosition.set(
+                position,
+                []
+            );
+
+        }
+
+
+        playersByPosition
+            .get(position)
+            .push(player);
+
+    });
+
+}
+
+
+/* ============================================================
+   OYUNCU GETİR
+   ============================================================ */
 
 function getPlayer(id){
 
-return players.find(
-player => player.id === id
-);
+    return playerById.get(
+        Number(id)
+    ) || null;
 
 }
 
 
-/* ==================================================
+/* ============================================================
    KULÜBE GÖRE OYUNCULAR
-================================================== */
+   ============================================================ */
 
-function getPlayersByClub(clubName){
+function getPlayersByClub(club){
 
-return players.filter(
-player => player.club === clubName
+    if(!club){
+
+        return [];
+
+    }
+
+    return (
+        playersByClub.get(club)
+        || []
+    );
+
+}
+
+
+/* ============================================================
+   ÜLKEYE GÖRE OYUNCULAR
+   ============================================================ */
+
+function getPlayersByCountry(country){
+
+    if(!country){
+
+        return [];
+
+    }
+
+    return (
+        playersByCountry.get(country)
+        || []
+    );
+
+}
+
+
+/* ============================================================
+   MEVKİYE GÖRE OYUNCULAR
+   ============================================================ */
+
+function getPlayersByPosition(position){
+
+    if(!position){
+
+        return [];
+
+    }
+
+    return (
+        playersByPosition.get(position)
+        || []
+    );
+
+}
+
+
+/* ============================================================
+   OYUNCU ARAMA
+   ============================================================ */
+
+function searchPlayers(query){
+
+    if(!query){
+
+        return players;
+
+    }
+
+
+    const search =
+        String(query)
+            .toLowerCase()
+            .trim();
+
+
+    return players.filter(
+        player => {
+
+            return (
+                String(player.name || "")
+                    .toLowerCase()
+                    .includes(search)
+
+                ||
+
+                String(player.club || "")
+                    .toLowerCase()
+                    .includes(search)
+
+                ||
+
+                String(
+                    player.nationality || ""
+                )
+                    .toLowerCase()
+                    .includes(search)
+            );
+
+        }
+    );
+
+}
+
+
+/* ============================================================
+   GELİŞMİŞ OYUNCU FİLTRESİ
+   ============================================================ */
+
+function filterPlayers(options = {}){
+
+    let result = players;
+
+
+    if(options.club){
+
+        result =
+            result.filter(
+                player =>
+                    player.club === options.club
+            );
+
+    }
+
+
+    if(options.country){
+
+        result =
+            result.filter(
+                player =>
+                    (
+                        player.country ||
+                        player.nationality
+                    )
+                    === options.country
+            );
+
+    }
+
+
+    if(options.position){
+
+        result =
+            result.filter(
+                player =>
+                    player.position ===
+                    options.position
+            );
+
+    }
+
+
+    if(options.minAge !== undefined){
+
+        result =
+            result.filter(
+                player =>
+                    Number(player.age)
+                    >= Number(options.minAge)
+            );
+
+    }
+
+
+    if(options.maxAge !== undefined){
+
+        result =
+            result.filter(
+                player =>
+                    Number(player.age)
+                    <= Number(options.maxAge)
+            );
+
+    }
+
+
+    if(options.minRating !== undefined){
+
+        result =
+            result.filter(
+                player =>
+                    Number(player.rating)
+                    >= Number(options.minRating)
+            );
+
+    }
+
+
+    if(options.maxRating !== undefined){
+
+        result =
+            result.filter(
+                player =>
+                    Number(player.rating)
+                    <= Number(options.maxRating)
+            );
+
+    }
+
+
+    if(options.minPotential !== undefined){
+
+        result =
+            result.filter(
+                player =>
+                    Number(player.potential)
+                    >= Number(options.minPotential)
+            );
+
+    }
+
+
+    if(options.maxValue !== undefined){
+
+        result =
+            result.filter(
+                player =>
+                    Number(player.value)
+                    <= Number(options.maxValue)
+            );
+
+    }
+
+
+    if(options.transferListed){
+
+        result =
+            result.filter(
+                player =>
+                    player.transferListed === true
+            );
+
+    }
+
+
+    if(options.loanListed){
+
+        result =
+            result.filter(
+                player =>
+                    player.loanListed === true
+            );
+
+    }
+
+
+    if(options.freeAgent){
+
+        result =
+            result.filter(
+                player =>
+                    player.freeAgent === true
+            );
+
+    }
+
+
+    return result;
+
+}
+
+
+/* ============================================================
+   TRANSFER UYGUNLUK SKORU
+   ============================================================ */
+
+function getTransferInterest(player, club){
+
+    if(!player || !club){
+
+        return 50;
+
+    }
+
+
+    let score = 50;
+
+
+    const clubRep =
+        Number(
+            club.reputation || 50
+        );
+
+
+    const rating =
+        Number(
+            player.rating || 0
+        );
+
+
+    const potential =
+        Number(
+            player.potential || rating
+        );
+
+
+    const age =
+        Number(
+            player.age || 25
+        );
+
+
+    /* KULÜP SEVİYESİ */
+
+    if(clubRep >= rating + 15){
+
+        score += 20;
+
+    }
+    else if(clubRep >= rating){
+
+        score += 12;
+
+    }
+    else if(clubRep >= rating - 10){
+
+        score += 3;
+
+    }
+    else{
+
+        score -= 18;
+
+    }
+
+
+    /* GENÇ OYUNCU */
+
+    if(
+        age <= 23 &&
+        potential >= 80
+    ){
+
+        score += 8;
+
+    }
+
+
+    /* TRANSFER LİSTESİ */
+
+    if(player.transferListed){
+
+        score += 10;
+
+    }
+
+
+    /* KİRALIK */
+
+    if(player.loanListed){
+
+        score += 6;
+
+    }
+
+
+    /* SERBEST */
+
+    if(player.freeAgent){
+
+        score += 15;
+
+    }
+
+
+    /* YILDIZ */
+
+    if(
+        rating >= 88 &&
+        clubRep < 90
+    ){
+
+        score -= 20;
+
+    }
+
+
+    return Math.max(
+        5,
+        Math.min(
+            95,
+            Math.round(score)
+        )
+    );
+
+}
+
+
+/* ============================================================
+   FOTOĞRAF SİSTEMİ
+   ============================================================ */
+
+function getPlayerPhoto(player){
+
+    if(!player){
+
+        return "images/players/default.webp";
+
+    }
+
+
+    if(player.photo){
+
+        return player.photo;
+
+    }
+
+
+    return (
+        "images/players/" +
+        player.id +
+        ".webp"
+    );
+
+}
+
+
+/* ============================================================
+   OYUNCU YAŞ HESAPLAMA
+   ============================================================ */
+
+function calculateAge(birthDate){
+
+    if(!birthDate){
+
+        return null;
+
+    }
+
+
+    const birth =
+        new Date(birthDate);
+
+    const now =
+        new Date();
+
+
+    let age =
+        now.getFullYear() -
+        birth.getFullYear();
+
+
+    const month =
+        now.getMonth() -
+        birth.getMonth();
+
+
+    if(
+        month < 0 ||
+        (
+            month === 0 &&
+            now.getDate() <
+            birth.getDate()
+        )
+    ){
+
+        age--;
+
+    }
+
+
+    return age;
+
+}
+
+
+/* ============================================================
+   OYUNCU VERİSİ DOĞRULAMA
+   ============================================================ */
+
+function validatePlayer(player){
+
+    if(!player){
+
+        return false;
+
+    }
+
+
+    if(
+        player.id === undefined ||
+        !player.name
+    ){
+
+        return false;
+
+    }
+
+
+    return true;
+
+}
+
+
+/* ============================================================
+   VERİ TABANI İSTATİSTİKLERİ
+   ============================================================ */
+
+function getPlayerDatabaseStats(){
+
+    return {
+
+        version:
+            PLAYER_DATABASE_VERSION,
+
+        expectedPlayers:
+            PLAYER_DATABASE_SIZE,
+
+        loadedPlayers:
+            players.length,
+
+        clubs:
+            playersByClub.size,
+
+        countries:
+            playersByCountry.size,
+
+        positions:
+            playersByPosition.size
+
+    };
+
+}
+
+
+/* ============================================================
+   VERİ TABANI BAŞLAT
+   ============================================================ */
+
+buildPlayerIndexes();
+
+
+/* ============================================================
+   DEBUG
+   ============================================================ */
+
+console.log(
+    "⚽ Samet Manager Player Database"
 );
 
-}
-
-
-/* ==================================================
-   İSİM ARAMA
-================================================== */
-
-function searchPlayers(name){
-
-const query =
-name.toLowerCase().trim();
-
-return players.filter(
-player =>
-player.name
-.toLowerCase()
-.includes(query)
+console.log(
+    "📦 Database Version:",
+    PLAYER_DATABASE_VERSION
 );
 
-}
-
-
-/* ==================================================
-   MEVKİ FİLTRESİ
-================================================== */
-
-function filterPlayersByPosition(position){
-
-return players.filter(
-player =>
-player.position === position
+console.log(
+    "👥 Loaded Players:",
+    players.length
 );
 
-}
-
-
-/* ==================================================
-   GEN FİLTRESİ
-================================================== */
-
-function filterPlayersByRating(minRating,maxRating){
-
-return players.filter(
-player =>
-player.rating >= minRating &&
-player.rating <= maxRating
+console.log(
+    "🏟️ Clubs:",
+    playersByClub.size
 );
 
-}
-
-
-/* ==================================================
-   YAŞ FİLTRESİ
-================================================== */
-
-function filterPlayersByAge(minAge,maxAge){
-
-return players.filter(
-player =>
-player.age >= minAge &&
-player.age <= maxAge
+console.log(
+    "🌍 Countries:",
+    playersByCountry.size
 );
 
-}
-
-
-/* ==================================================
-   FİYAT FİLTRESİ
-================================================== */
-
-function filterPlayersByValue(minValue,maxValue){
-
-return players.filter(
-player =>
-player.value >= minValue &&
-player.value <= maxValue
+console.log(
+    "📊 Positions:",
+    playersByPosition.size
 );
-
-}
-
-
-/* ==================================================
-   TRANSFER LİSTESİ
-================================================== */
-
-function getTransferListedPlayers(){
-
-return players.filter(
-player =>
-player.transferListed === true
-);
-
-}
-
-
-/* ==================================================
-   KİRALIK OYUNCULAR
-================================================== */
-
-function getLoanListedPlayers(){
-
-return players.filter(
-player =>
-player.loanListed === true
-);
-
-}
-
-
-/* ==================================================
-   BONSERVİSSİZ OYUNCULAR
-================================================== */
-
-function getFreeAgents(){
-
-return players.filter(
-player =>
-player.freeAgent === true
-);
-
-}
-
-
-/* ==================================================
-   TRANSFER UYGUNLUĞU
-================================================== */
-
-function calculateTransferInterest(
-player,
-club
-){
-
-let score = 50;
-
-
-/* Kulüp itibarı */
-
-if(club.reputation){
-
-score +=
-(club.reputation - player.rating) * 0.35;
-
-}
-
-
-/* Kariyer seviyesi */
-
-if(player.rating >= 85){
-
-if(club.reputation >= 90){
-
-score += 20;
-
-}else if(club.reputation >= 80){
-
-score += 5;
-
-}else{
-
-score -= 25;
-
-}
-
-}
-
-
-/* Genç oyuncular */
-
-if(player.age <= 21){
-
-if(club.reputation >= 75){
-
-score += 10;
-
-}
-
-}
-
-
-/* Yaşlı oyuncular */
-
-if(player.age >= 32){
-
-score += 5;
-
-}
-
-
-/* Sonuç */
-
-return Math.max(
-5,
-Math.min(
-95,
-Math.round(score)
-)
-);
-
-}
-
-
-/* ==================================================
-   GLOBAL ERİŞİM
-================================================== */
-
-window.players = players;
-
-window.getPlayer = getPlayer;
-
-window.getPlayersByClub =
-getPlayersByClub;
-
-window.searchPlayers =
-searchPlayers;
-
-window.filterPlayersByPosition =
-filterPlayersByPosition;
-
-window.filterPlayersByRating =
-filterPlayersByRating;
-
-window.filterPlayersByAge =
-filterPlayersByAge;
-
-window.filterPlayersByValue =
-filterPlayersByValue;
-
-window.getTransferListedPlayers =
-getTransferListedPlayers;
-
-window.getLoanListedPlayers =
-getLoanListedPlayers;
-
-window.getFreeAgents =
-getFreeAgents;
-
-window.calculateTransferInterest =
-calculateTransferInterest;
